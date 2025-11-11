@@ -8,7 +8,6 @@ const packageJson = require('./package.json');
 const homepage = packageJson.homepage;
 const publicPath = homepage ? new URL(homepage).pathname : '/';
 
-
 module.exports = merge(common, {
   mode: 'production',
   output: {
@@ -16,19 +15,16 @@ module.exports = merge(common, {
   },
   module: {
     rules: [
-
       {
         test: /\.css$/,
         include: path.resolve(__dirname, 'src'),
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
-
       {
         test: /\.css$/,
         include: path.resolve(__dirname, 'node_modules'),
         use: ['style-loader', 'css-loader'],
       },
-
       {
         test: /\.js$/,
         exclude: /node_modules/,

@@ -15,6 +15,15 @@ class App {
 
     this._setupDrawer();
     this._initNotificationToggle();
+    this._initSkipLink();
+  }
+
+  _initSkipLink() {
+    const skipLink = document.getElementById('skip-link');
+    skipLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      this.#content.focus();
+    });
   }
 
   _isUserLoggedIn() {

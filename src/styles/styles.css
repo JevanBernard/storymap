@@ -340,7 +340,8 @@ footer {
 
 /* Halaman Form (Login, Register, Add Story) */
 .auth-page,
-.add-story-page {
+.add-story-page
+.offline-page {
   max-width: 500px;
   margin: 2rem auto;
   padding: 2.5rem;
@@ -350,14 +351,16 @@ footer {
 }
 
 .auth-page__title,
-.add-story-page h2 {
+.add-story-page h2 
+.offline-page h2 {
   text-align: center;
   margin-top: 0;
   margin-bottom: 2rem;
   color: var(--color-text-primary);
   font-weight: 700;
 }
-.add-story-page p {
+.add-story-page p 
+.offline-page p {
   text-align: center;
   margin-top: -1.5rem;
   margin-bottom: 2rem;
@@ -416,6 +419,15 @@ footer {
 .auth-button:disabled {
   background-color: #aaa;
   cursor: not-allowed;
+}
+
+/* Style Tombol Hapus di Halaman Offline */
+.delete-button {
+  background-color: var(--color-error);
+  margin-top: 1rem;
+}
+.delete-button:hover {
+  background-color: #B91C1C;
 }
 
 .auth-redirect {
@@ -511,11 +523,19 @@ footer {
   margin-left: 1rem;
 }
 
+.toggle-label {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-right: 0.75rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
 .notification-toggle {
   position: relative;
   display: inline-block;
-  width: 50px; /* Lebar saklar */
-  height: 28px; /* Tinggi saklar */
+  width: 50px; 
+  height: 28px;
 }
 
 .notification-toggle input {
@@ -539,8 +559,8 @@ footer {
 .toggle-slider:before {
   position: absolute;
   content: "";
-  height: 20px; /* Ukuran knob */
-  width: 20px; /* Ukuran knob */
+  height: 20px;
+  width: 20px;
   left: 4px;
   bottom: 4px;
   background-color: white;
@@ -566,5 +586,8 @@ footer {
     margin-left: 0;
     padding: 1rem 0;
     justify-content: center;
+  }
+  .toggle-label {
+    font-size: 1.1rem;
   }
 }

@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   if ('serviceWorker' in navigator) {
-    const wb = new Workbox('/sw.js');
+    const wb = new Workbox('sw.js');
 
     wb.addEventListener('waiting', () => {
       console.log('Service worker baru sedang menunggu untuk aktif.');

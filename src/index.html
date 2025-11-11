@@ -16,7 +16,7 @@
     <title>Story Map App</title>
   </head>
   <body data-auth-state="guest">
-    <a href="#app-content" class="skip-to-content">Lompat ke Konten</a>
+    <a id="skip-link" href="javascript:void(0);" class="skip-to-content">Lompat ke Konten</a>
     <header>
       <div class="main-header container">
         <h1 class="brand-name">
@@ -52,7 +52,8 @@
 
             <!-- Toggle Notifikasi -->
             <li data-auth="user" class="nav-item--toggle">
-              <label class="notification-toggle" for="notification-toggle" aria-label="Aktifkan notifikasi">
+              <span class="toggle-label" id="notification-label">Notifikasi</span>
+              <label class="notification-toggle" for="notification-toggle" aria-labelledby="notification-label">
                 <input type="checkbox" id="notification-toggle">
                 <span class="toggle-slider"></span>
               </label>

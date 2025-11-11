@@ -1,11 +1,6 @@
-// src/webpack.common.js
-// PERBAIKAN: Menghapus plugin yg konflik & menambah loader gambar
-
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-// HAPUS: CleanWebpackPlugin (konflik dgn output.clean)
-// HAPUS: Workbox & MiniCss (pindah ke prod.js)
 
 module.exports = {
   entry: {
@@ -14,12 +9,11 @@ module.exports = {
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    clean: true, // <-- Ini adalah cara modern (menggantikan CleanWebpackPlugin)
+    clean: true,
     assetModuleFilename: 'assets/[name][ext]',
   },
   module: {
     rules: [
-      // PERBAIKAN: Menambahkan loader untuk gambar (Memperbaiki error marker Leaflet)
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',

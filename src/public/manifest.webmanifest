@@ -1,0 +1,48 @@
+{
+  "name": "Story Map App",
+  "short_name": "StoryMap",
+  "description": "Aplikasi PWA untuk berbagi cerita berbasis lokasi.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#F0F4FA",
+  "theme_color": "#6D28D9",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/screenshot1.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Tampilan Peta Cerita"
+    },
+    {
+      "src": "screenshots/screenshot2.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Tampilan Tambah Cerita"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tambah Cerita Baru",
+      "short_name": "Tambah",
+      "description": "Buka halaman untuk menambah cerita baru",
+      "url": "/#/add-story",
+      "icons": [{ "src": "icons/add-icon.png", "sizes": "192x192" }]
+    }
+  ]
+}

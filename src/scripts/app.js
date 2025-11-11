@@ -81,6 +81,11 @@ class App {
       return; 
     }
 
+    if (!isLoggedIn && (url === '/add-story' || url === '/offline')) {
+      window.location.hash = '#/';
+      return; 
+    }
+
     try {
       const page = routes[url] || routes['/']; 
       

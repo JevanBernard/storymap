@@ -1,10 +1,6 @@
-// src/pages/register/register-page.js
-// PERBAIKAN: 'render()' dibuat sinkron
-
 import StoryApi from '../../data/story-api';
 
 class RegisterPage {
-  // PERBAIKAN: 'render()' dibuat sinkron
   render() {
     return `
       <section class="auth-page">
@@ -34,7 +30,6 @@ class RegisterPage {
   }
 
   async afterRender() {
-    // ... (kode afterRender-mu sudah benar) ...
     const registerForm = document.getElementById('register-form');
     const errorMessageElement = document.getElementById('error-message');
 

@@ -1,16 +1,12 @@
-// src/sw.js
-// PERBAIKAN TOTAL: Kriteria 4 (Advanced)
-// TIDAK mengimpor StoryApi. Mengambil token dari IDB & fetch manual.
-
 import { precacheAndRoute } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate, CacheFirst } from 'workbox-strategies';
 import { clientsClaim, setCacheNameDetails } from 'workbox-core';
 
-// IMPOR BARU: Helper IDB untuk ambil token & data
+// Helper IDB untuk ambil token & data
 import IdbHelper from './scripts/data/idb-helper';
 
-// URL API (untuk fetch manual)
+// URL API
 const STORY_API_BASE_URL = 'https://story-api.dicoding.dev/v1';
 
 setCacheNameDetails({
@@ -50,7 +46,7 @@ registerRoute(
   })
 );
 
-// --- Kriteria 2: PUSH NOTIFICATION (Sudah Benar) ---
+// PUSH NOTIFICATION (Sudah Benar)
 self.addEventListener('push', (event) => {
   console.log('Push event diterima:', event.data.text());
   
@@ -91,7 +87,7 @@ self.addEventListener('notificationclick', (event) => {
     );
 });
 
-// --- Kriteria 4 (Advanced): BACKGROUND SYNC (SUDAH DIPERBAIKI) ---
+// BACKGROUND SYNC
 self.addEventListener('sync', (event) => {
   console.log('Event "sync" terdeteksi:', event.tag);
   if (event.tag === 'sync-offline-stories') {
@@ -99,22 +95,16 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-/**
- * PERBAIKAN TOTAL:
- * Fungsi ini sekarang mengambil token dari IDB dan fetch manual.
- */
 async function syncOfflineStories() {
   console.log('Menjalankan background sync untuk upload cerita...');
   
   try {
-    // 1. Ambil token dari IndexedDB
     const token = await IdbHelper.getToken();
     if (!token) {
       console.warn('Token tidak ditemukan di IDB, sync dibatalkan.');
       return;
     }
 
-    // 2. Ambil semua cerita dari IndexedDB
     const stories = await IdbHelper.getAllStories();
     if (stories.length === 0) {
       console.log('Tidak ada cerita offline untuk disinkronkan.');
@@ -123,7 +113,6 @@ async function syncOfflineStories() {
 
     console.log(`Menemukan ${stories.length} cerita untuk disinkronkan...`);
 
-    // 3. Coba upload satu per satu
     for (const story of stories) {
       console.log('Mencoba upload cerita ID:', story.id);
       
@@ -134,7 +123,6 @@ async function syncOfflineStories() {
       formData.append('lon', story.lon);
 
       try {
-        // 4. Lakukan FETCH MANUAL menggunakan token dari IDB
         const response = await fetch(`${STORY_API_BASE_URL}/stories`, {
           method: 'POST',
           headers: {
@@ -149,7 +137,6 @@ async function syncOfflineStories() {
           throw new Error(`Gagal upload (Status: ${response.status}): ${responseJson.message}`);
         }
         
-        // 5. Jika berhasil, hapus dari IDB
         await IdbHelper.deleteStory(story.id);
         console.log('Cerita ID:', story.id, 'berhasil disinkronkan.');
         

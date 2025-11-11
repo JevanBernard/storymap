@@ -1,6 +1,3 @@
-// src/pages/stories/stories-page.js
-// PERBAIKAN: 'render()' dibuat sinkron
-
 import L from 'leaflet';
 import StoryApi from '../../data/story-api';
 
@@ -11,8 +8,6 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 class StoriesPage {
   constructor() {
     this._map = null;
-    
-    // Fix untuk marker Leaflet (sudah benar)
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconUrl: markerIcon,
@@ -26,7 +21,6 @@ class StoriesPage {
     return new Date(dateString).toLocaleDateString('id-ID', options);
   }
 
-  // PERBAIKAN: 'render()' dibuat sinkron
   render() {
     return `
       <section class="stories-page">

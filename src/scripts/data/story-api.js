@@ -1,6 +1,3 @@
-// src/scripts/data/story-api.js
-// PERBAIKAN: 'logout()' asinkron, 'login()' mengembalikan data
-
 import IdbHelper from './idb-helper'; // Impor helper IDB
 
 const STORY_API_BASE_URL = 'https://story-api.dicoding.dev/v1';
@@ -14,7 +11,6 @@ class StoryApi {
     return localStorage.getItem('authToken');
   }
 
-  // PERBAIKAN: 'logout()' harus 'async' untuk membersihkan IDB
   static async logout() {
     localStorage.removeItem('authToken'); // Hapus dari localStorage
     await IdbHelper.deleteToken(); // Hapus dari IndexedDB
@@ -38,7 +34,7 @@ class StoryApi {
         this._saveToken(responseJson.loginResult.token);
       }
       
-      return responseJson; // <-- Kembalikan semua data
+      return responseJson;
       
     } catch (error) {
       console.error('Login failed:', error.message);

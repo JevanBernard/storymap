@@ -1,12 +1,8 @@
-// src/pages/login/login-page.js
-// PERBAIKAN: 'render()' sinkron, 'login()' menyimpan token ke IDB
-
 import StoryApi from '../../data/story-api';
 import { updateNavBasedOnAuth } from '../../utils/auth-ui';
 import IdbHelper from '../../data/idb-helper'; // Impor IDB
 
 class LoginPage {
-  // PERBAIKAN: 'render()' dibuat sinkron
   render() {
     return `
       <section class="auth-page">
@@ -58,7 +54,7 @@ class LoginPage {
         // AMBIL TOKEN DARI RESPONSE
         const token = response.loginResult.token;
         
-        // PERBAIKAN Kriteria 4: Simpan token ke IndexedDB
+        // Simpan token ke IndexedDB
         await IdbHelper.saveToken(token);
         
         updateNavBasedOnAuth();

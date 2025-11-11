@@ -1,6 +1,5 @@
 import routes from '../routes'; 
 
-// Fungsi utama router
 const router = async () => {
   const appContent = document.getElementById('app-content');
   if (!appContent) {

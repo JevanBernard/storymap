@@ -1,12 +1,9 @@
-// src/scripts/data/idb-helper.js
-// PERBAIKAN: Menambahkan 'AUTH_STORE_NAME' (v2)
-
 import { openDB } from 'idb';
 
 const DB_NAME = 'storymap-db';
-const DB_VERSION = 2; // NAIKKAN VERSI DB
+const DB_VERSION = 2;
 const OFFLINE_STORE_NAME = 'offline_stories';
-const AUTH_STORE_NAME = 'auth_token'; // <-- STORE BARU
+const AUTH_STORE_NAME = 'auth_token';
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion) {
@@ -18,7 +15,7 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
       });
     }
     
-    // VERSI 2: Buat object store 'auth_token'
+    // Buat object store 'auth_token'
     if (oldVersion < 2 || !db.objectStoreNames.contains(AUTH_STORE_NAME)) {
       db.createObjectStore(AUTH_STORE_NAME);
     }
@@ -26,7 +23,7 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
 });
 
 const IdbHelper = {
-  // --- Fungsi Cerita Offline ---
+  // Fungsi Cerita Offline
   async putStory(story) {
     const db = await dbPromise;
     return db.put(OFFLINE_STORE_NAME, story);
@@ -40,7 +37,7 @@ const IdbHelper = {
     return db.delete(OFFLINE_STORE_NAME, id);
   },
 
-  // --- Fungsi Token (BARU) ---
+  // Fungsi Token
   async saveToken(token) {
     const db = await dbPromise;
     return db.put(AUTH_STORE_NAME, token, 'authTokenKey');

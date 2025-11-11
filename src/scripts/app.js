@@ -1,7 +1,4 @@
-// src/scripts/app.js
-// PERBAIKAN: 'render()' sinkron, 'logout()' asinkron
-
-import routes from './routes/routes'; // Path ini sudah benar
+import routes from './routes/routes';
 import StoryApi from './data/story-api';
 import { updateNavBasedOnAuth } from './utils/auth-ui';
 import { initNotificationToggle } from './utils/notification-helper';
@@ -21,7 +18,7 @@ class App {
   }
 
   _isUserLoggedIn() {
-    return !!StoryApi.getToken(); // Cek dari localStorage
+    return !!StoryApi.getToken();
   }
 
   _setupDrawer() {
@@ -43,13 +40,12 @@ class App {
       }
     });
 
-    // PERBAIKAN: 'logout()' sekarang 'async'
     const logoutLink = document.getElementById('logout-link');
     if (logoutLink) {
       logoutLink.addEventListener('click', async (event) => { 
         event.preventDefault();
         
-        await StoryApi.logout(); // <-- Panggil versi async
+        await StoryApi.logout();
         updateNavBasedOnAuth(); 
         
         window.location.hash = '#/';
@@ -66,8 +62,7 @@ class App {
   async renderPage() {
     const isLoggedIn = this._isUserLoggedIn();
     const url = this._getActiveRoute();
-    
-    // Logika redirect sudah benar
+
     if (isLoggedIn && (url === '/' || url === '/register')) {
       window.location.hash = '#/stories';
       return; 
@@ -82,9 +77,8 @@ class App {
       
       if (document.startViewTransition) {
         document.startViewTransition(async () => {
-          // PERBAIKAN: render() sinkron (memperbaiki bug 'ngeload terus')
           this.#content.innerHTML = page.render(); 
-          await page.afterRender(); // afterRender tetap async
+          await page.afterRender();
         });
       } else {
         this.#content.innerHTML = page.render();

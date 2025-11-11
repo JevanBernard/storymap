@@ -1,10 +1,6 @@
-// src/scripts/index.js
-// PERBAIKAN: Menggunakan sintaks Workbox v6+ ('new Workbox')
-
 import 'leaflet/dist/leaflet.css';
 import '../styles/styles.css'; 
 import App from './app';
-// PERBAIKAN: Impor 'Workbox' (class), bukan 'register' (fungsi)
 import { Workbox } from 'workbox-window';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,9 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     app.renderPage();
   });
   
-  // PERBAIKAN: Gunakan sintaks 'Workbox' class (v6+)
   if ('serviceWorker' in navigator) {
-    const wb = new Workbox('/sw.js'); // Buat instance Workbox
+    const wb = new Workbox('/sw.js');
 
     wb.addEventListener('waiting', () => {
       console.log('Service worker baru sedang menunggu untuk aktif.');
@@ -37,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Daftarkan service worker
     wb.register();
   }
 });

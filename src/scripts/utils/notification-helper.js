@@ -1,12 +1,6 @@
-// src/scripts/utils/notification-helper.js
-// File BARU untuk mengelola logika Push Notification
+const VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk'; 
 
-// VAPID public key dari API (sesuai dokumentasi)
-const VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk'; // <-- GANTI DENGAN KUNCI PUBLIK VAPID DARI DOKUMENTASI API
-
-/**
- * Mengubah string VAPID key ke Uint8Array
- */
+// Mengubah string VAPID key ke Uint8Array
 function _urlB64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -18,9 +12,7 @@ function _urlB64ToUint8Array(base64String) {
   return outputArray;
 }
 
-/**
- * Meminta izin notifikasi ke pengguna
- */
+// Meminta izin notifikasi ke pengguna
 async function requestNotificationPermission() {
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') {
@@ -29,9 +21,7 @@ async function requestNotificationPermission() {
   return permission;
 }
 
-/**
- * Melakukan subscribe ke push notification
- */
+// Melakukan subscribe ke push notification
 async function subscribePush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     throw new Error('Push messaging tidak didukung.');
@@ -44,27 +34,20 @@ async function subscribePush() {
   });
   
   console.log('Push subscription berhasil:', subscription);
-  // TODO: Kirim subscription ke server (jika API menyediakan endpoint)
   return subscription;
 }
 
-/**
- * Melakukan unsubscribe dari push notification
- */
+// Melakukan unsubscribe dari push notification
 async function unsubscribePush() {
   const registration = await navigator.serviceWorker.ready;
   const subscription = await registration.pushManager.getSubscription();
   if (subscription) {
     await subscription.unsubscribe();
     console.log('Push subscription dibatalkan.');
-    // TODO: Kirim notifikasi unsubscribe ke server (jika ada)
   }
 }
 
-/**
- * Kriteria 2 (Advanced): Inisialisasi Toggle Notifikasi
- * Mengatur UI toggle dan listener-nya
- */
+// Inisialisasi Toggle Notifikasi
 async function initNotificationToggle() {
   const toggle = document.getElementById('notification-toggle');
   if (!toggle) return;
@@ -91,7 +74,7 @@ async function initNotificationToggle() {
     } catch (error) {
       console.error('Gagal mengubah status notifikasi:', error.message);
       alert(`Gagal: ${error.message}`);
-      toggle.checked = !isChecked; // Kembalikan ke state semula jika gagal
+      toggle.checked = !isChecked;
     }
   });
 }

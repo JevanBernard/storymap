@@ -1,7 +1,7 @@
-import StoryApi from '../data/story-api'; // <-- Impor default class
+import StoryApi from '../data/story-api';
 
 const updateNavBasedOnAuth = () => {
-  const token = StoryApi.getToken(); // <-- Panggil static method dari class
+  const token = StoryApi.getToken();
   const body = document.querySelector('body');
   
   if (token) {

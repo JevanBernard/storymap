@@ -2,7 +2,7 @@
   "name": "app-starter-project-with-webpack",
   "version": "1.0.0",
   "description": "",
-  "homepage": "homepage": "[https://JevanBernard.github.io/storymap](https://JevanBernard.github.io/storymap)",
+  "homepage": "https://JevanBernard.github.io/storymap",
   "scripts": {
   "start-dev": "webpack serve --config webpack.dev.js",
   "build": "webpack --config webpack.prod.js",

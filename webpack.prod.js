@@ -3,9 +3,8 @@ const common = require('./webpack.common.js');
 const { merge } = require('webpack-merge');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
-const packageJson = require('./package.json');
-const homepage = packageJson.homepage;
-const publicPath = homepage ? new URL(homepage).pathname : '/';
+// Use relative publicPath so the build works both on local server and GitHub Pages
+const publicPath = './';
 
 module.exports = merge(common, {
   mode: 'production',

@@ -1,5 +1,6 @@
 import L from 'leaflet';
 import StoryApi from '../../data/story-api';
+import IdbHelper from '../../data/idb-helper';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -26,6 +27,10 @@ class StoriesPage {
       <section class="stories-page">
         <h2>Jelajahi Cerita di Peta</h2>
         <p>Lihat cerita dari seluruh penjuru!</p>
+        <div class="favorites-controls">
+          <button id="show-favorites-btn" class="btn">Lihat Favorit</button>
+        </div>
+        <div id="favorites-list-container" class="story-list" style="display:none; margin-bottom: 16px;"></div>
         <div id="map"></div>
         <h3>Daftar Cerita</h3>
         <div id="story-list-container" class="story-list">
@@ -40,6 +45,16 @@ class StoriesPage {
       const stories = await StoryApi.getAllStories();
       this._initMap(stories);
       this._renderStoryList(stories);
+      // Render favorites dan pasang listener
+      this._renderFavoritesList();
+      const favBtn = document.getElementById('show-favorites-btn');
+      if (favBtn) {
+        favBtn.addEventListener('click', () => {
+          const favContainer = document.getElementById('favorites-list-container');
+          if (!favContainer) return;
+          favContainer.style.display = favContainer.style.display === 'none' ? 'block' : 'none';
+        });
+      }
     } catch (error) {
       if (error.message.includes('401')) { 
         alert('Sesi Anda habis. Silakan login kembali.');
@@ -135,7 +150,78 @@ class StoriesPage {
       }
       storyItem.innerHTML = storyHTML;
       storyContainer.appendChild(storyItem);
+      // Tambahkan tombol favorit
+      const favAction = document.createElement('button');
+      favAction.textContent = '★ Simpan';
+      favAction.className = 'btn btn--small btn--favorite';
+      favAction.setAttribute('data-story-id', story.id || '');
+      favAction.addEventListener('click', async () => {
+        try {
+          await IdbHelper.addFavorite({
+            id: story.id,
+            name: story.name,
+            description: story.description,
+            photoUrl: story.photoUrl,
+            createdAt: story.createdAt,
+            lat: story.lat,
+            lon: story.lon,
+          });
+          favAction.textContent = '✓ Tersimpan';
+          // refresh favorites list
+          this._renderFavoritesList();
+        } catch (err) {
+          console.error('Gagal menyimpan favorit:', err);
+          alert('Gagal menyimpan favorit. Coba lagi.');
+        }
+      });
+      // let user find actions area
+      const contentEl = storyItem.querySelector('.story-item__content') || storyItem;
+      contentEl.appendChild(favAction);
     });
+  }
+
+  async _renderFavoritesList() {
+    const favContainer = document.getElementById('favorites-list-container');
+    if (!favContainer) return;
+    try {
+      const favorites = await IdbHelper.getAllFavorites();
+      if (!favorites || favorites.length === 0) {
+        favContainer.innerHTML = '<p class="story-item story-item--no-image">Belum ada favorit tersimpan.</p>';
+        return;
+      }
+      favContainer.innerHTML = '';
+      favorites.forEach(fav => {
+        const favItem = document.createElement('article');
+        favItem.classList.add('story-item');
+        const favHTML = `
+          <div class="story-item__content">
+            <h4 class="story-item__title">${fav.name || 'Cerita Tanpa Nama'}</h4>
+            <span class="story-item__date">${this._formatDate(fav.createdAt || Date.now())}</span>
+            <p class="story-item__description">${(fav.description || '').substring(0, 140)}</p>
+          </div>
+        `;
+        favItem.innerHTML = favHTML;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn--small btn--danger';
+        removeBtn.textContent = 'Hapus';
+        removeBtn.addEventListener('click', async () => {
+          try {
+            await IdbHelper.deleteFavorite(fav.id);
+            this._renderFavoritesList();
+          } catch (err) {
+            console.error('Gagal hapus favorit:', err);
+            alert('Gagal menghapus favorit. Coba lagi.');
+          }
+        });
+
+        favItem.appendChild(removeBtn);
+        favContainer.appendChild(favItem);
+      });
+    } catch (err) {
+      console.error('Gagal memuat favorit:', err);
+      favContainer.innerHTML = '<p class="story-item story-item--no-image">Gagal memuat favorit.</p>';
+    }
   }
 }
 

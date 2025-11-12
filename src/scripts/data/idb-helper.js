@@ -1,9 +1,10 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'storymap-db';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const OFFLINE_STORE_NAME = 'offline_stories';
 const AUTH_STORE_NAME = 'auth_token';
+const FAVORITES_STORE_NAME = 'favorites';
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion) {
@@ -18,6 +19,12 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
     // Buat object store 'auth_token'
     if (oldVersion < 2 || !db.objectStoreNames.contains(AUTH_STORE_NAME)) {
       db.createObjectStore(AUTH_STORE_NAME);
+    }
+    // Buat object store 'favorites' untuk menyimpan cerita favorit (id dari API sebagai key)
+    if (oldVersion < 3 || !db.objectStoreNames.contains(FAVORITES_STORE_NAME)) {
+      db.createObjectStore(FAVORITES_STORE_NAME, {
+        keyPath: 'id',
+      });
     }
   },
 });
@@ -49,6 +56,21 @@ const IdbHelper = {
   async deleteToken() {
     const db = await dbPromise;
     return db.delete(AUTH_STORE_NAME, 'authTokenKey');
+  },
+  // FAVORITES: menyimpan, mengambil semua, menghapus
+  async addFavorite(story) {
+    const db = await dbPromise;
+    // Pastikan story punya id; kalau tidak, buat id timestamp
+    if (!story.id) story.id = `fav-${Date.now()}`;
+    return db.put(FAVORITES_STORE_NAME, story);
+  },
+  async getAllFavorites() {
+    const db = await dbPromise;
+    return db.getAll(FAVORITES_STORE_NAME);
+  },
+  async deleteFavorite(id) {
+    const db = await dbPromise;
+    return db.delete(FAVORITES_STORE_NAME, id);
   },
 };
 

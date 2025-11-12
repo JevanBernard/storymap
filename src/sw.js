@@ -139,6 +139,19 @@ async function syncOfflineStories() {
         
         await IdbHelper.deleteStory(story.id);
         console.log('Cerita ID:', story.id, 'berhasil disinkronkan.');
+        // Tampilkan notifikasi kecil ketika sebuah cerita offline berhasil diupload
+        const notifTitle = 'Cerita tersinkronisasi';
+        const notifOptions = {
+          body: `Cerita "${story.description?.substring(0, 40) || 'tanpa judul'}" berhasil diupload.`,
+          icon: 'icons/icon-192x192.png',
+          badge: 'icons/icon-192x192.png',
+          data: { url: '/#/stories' }
+        };
+        try {
+          await self.registration.showNotification(notifTitle, notifOptions);
+        } catch (err) {
+          console.warn('Gagal menampilkan notifikasi sinkronisasi:', err.message);
+        }
         
       } catch (uploadError) {
         console.error('Gagal sinkronisasi cerita ID:', story.id, uploadError.message);

@@ -1,10 +1,11 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'storymap-db';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const OFFLINE_STORE_NAME = 'offline_stories';
 const AUTH_STORE_NAME = 'auth_token';
 const FAVORITES_STORE_NAME = 'favorites';
+const SUBSCRIPTIONS_STORE_NAME = 'push_subscriptions';
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
   upgrade(db, oldVersion) {
@@ -24,6 +25,12 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
     if (oldVersion < 3 || !db.objectStoreNames.contains(FAVORITES_STORE_NAME)) {
       db.createObjectStore(FAVORITES_STORE_NAME, {
         keyPath: 'id',
+      });
+    }
+    // Buat object store untuk menyimpan push subscription secara lokal
+    if (oldVersion < 4 || !db.objectStoreNames.contains(SUBSCRIPTIONS_STORE_NAME)) {
+      db.createObjectStore(SUBSCRIPTIONS_STORE_NAME, {
+        keyPath: 'endpoint',
       });
     }
   },
@@ -71,6 +78,20 @@ const IdbHelper = {
   async deleteFavorite(id) {
     const db = await dbPromise;
     return db.delete(FAVORITES_STORE_NAME, id);
+  },
+  // PUSH SUBSCRIPTIONS: simpan, ambil semua, hapus
+  async saveSubscription(subscription) {
+    const db = await dbPromise;
+    // subscription should be a plain object (not including functions)
+    return db.put(SUBSCRIPTIONS_STORE_NAME, subscription);
+  },
+  async getAllSubscriptions() {
+    const db = await dbPromise;
+    return db.getAll(SUBSCRIPTIONS_STORE_NAME);
+  },
+  async deleteSubscription(endpoint) {
+    const db = await dbPromise;
+    return db.delete(SUBSCRIPTIONS_STORE_NAME, endpoint);
   },
 };
 

@@ -12,6 +12,9 @@ function _urlB64ToUint8Array(base64String) {
   return outputArray;
 }
 
+import StoryApi from '../data/story-api';
+import IdbHelper from '../data/idb-helper';
+
 // Meminta izin notifikasi ke pengguna
 async function requestNotificationPermission() {
   const permission = await Notification.requestPermission();
@@ -34,6 +37,23 @@ async function subscribePush() {
   });
   
   console.log('Push subscription berhasil:', subscription);
+  // Simpan subscription ke server (jika tersedia) dan lokal di IndexedDB
+  try {
+    // Kirim ke server jika user sudah login
+    try {
+      await StoryApi.registerPushSubscription(subscription);
+      console.log('Subscription dikirim ke server.');
+    } catch (serverErr) {
+      console.warn('Gagal mengirim subscription ke server (mungkin endpoint tidak tersedia):', serverErr.message);
+    }
+
+    // Simpan juga di IndexedDB agar tersedia saat offline
+    const plainSub = JSON.parse(JSON.stringify(subscription));
+    await IdbHelper.saveSubscription(plainSub);
+  } catch (err) {
+    console.error('Gagal menyimpan subscription lokal:', err.message);
+  }
+
   return subscription;
 }
 
@@ -42,8 +62,20 @@ async function unsubscribePush() {
   const registration = await navigator.serviceWorker.ready;
   const subscription = await registration.pushManager.getSubscription();
   if (subscription) {
+    const endpoint = subscription.endpoint;
     await subscription.unsubscribe();
-    console.log('Push subscription dibatalkan.');
+    console.log('Push subscription dibatalkan (local).');
+    // Hapus dari server dan lokal
+    try {
+      await StoryApi.unregisterPushSubscription(endpoint);
+    } catch (err) {
+      console.warn('Gagal memanggil endpoint unregister di server:', err.message);
+    }
+    try {
+      await IdbHelper.deleteSubscription(endpoint);
+    } catch (err) {
+      console.warn('Gagal menghapus subscription dari IDB:', err.message);
+    }
   }
 }
 

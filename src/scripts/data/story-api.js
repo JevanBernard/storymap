@@ -126,6 +126,66 @@ class StoryApi {
       throw error;
     }
   }
+
+  static async registerPushSubscription(subscription) {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('401 (Token tidak ada)');
+    }
+
+    try {
+      const response = await fetch(`${STORY_API_BASE_URL}/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(subscription),
+      });
+
+      if (response.status === 401) {
+        await this.logout();
+        throw new Error('401 (Token tidak valid)');
+      }
+
+      const responseJson = await response.json();
+      if (responseJson.error) throw new Error(responseJson.message || 'Gagal menyimpan subscription');
+      return responseJson;
+    } catch (error) {
+      console.error('registerPushSubscription failed:', error.message);
+      throw error;
+    }
+  }
+
+  static async unregisterPushSubscription(endpoint) {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('401 (Token tidak ada)');
+    }
+
+    try {
+      const response = await fetch(`${STORY_API_BASE_URL}/unsubscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ endpoint }),
+      });
+
+      if (response.status === 401) {
+        await this.logout();
+        throw new Error('401 (Token tidak valid)');
+      }
+
+      const responseJson = await response.json();
+      if (responseJson.error) throw new Error(responseJson.message || 'Gagal menghapus subscription');
+      return responseJson;
+    } catch (error) {
+      console.error('unregisterPushSubscription failed:', error.message);
+      throw error;
+    }
+  }
 }
 
 export default StoryApi;

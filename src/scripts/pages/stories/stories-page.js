@@ -44,9 +44,11 @@ class StoriesPage {
     try {
       const stories = await StoryApi.getAllStories();
       this._initMap(stories);
+      // Load favorites ids into a Set for fast lookup
+      this._favoriteIds = new Set((await IdbHelper.getAllFavorites()).map(f => f.id));
       this._renderStoryList(stories);
-      // Render favorites dan pasang listener
-      this._renderFavoritesList();
+      // Render favorites list dan pasang listener
+      await this._renderFavoritesList();
       const favBtn = document.getElementById('show-favorites-btn');
       if (favBtn) {
         favBtn.addEventListener('click', () => {
@@ -152,11 +154,23 @@ class StoriesPage {
       storyContainer.appendChild(storyItem);
       // Tambahkan tombol favorit
       const favAction = document.createElement('button');
-      favAction.textContent = '★ Simpan';
       favAction.className = 'btn btn--small btn--favorite';
       favAction.setAttribute('data-story-id', story.id || '');
+      // Jika sudah ada di favorites, tampilkan state tersimpan
+      const isFav = story.id && this._favoriteIds && this._favoriteIds.has(story.id);
+      if (isFav) {
+        favAction.textContent = '✓ Tersimpan';
+        favAction.disabled = true;
+        favAction.setAttribute('aria-pressed', 'true');
+      } else {
+        favAction.textContent = '★ Simpan';
+        favAction.setAttribute('aria-pressed', 'false');
+      }
+
       favAction.addEventListener('click', async () => {
         try {
+          // Prevent double save
+          favAction.disabled = true;
           await IdbHelper.addFavorite({
             id: story.id,
             name: story.name,
@@ -166,14 +180,20 @@ class StoriesPage {
             lat: story.lat,
             lon: story.lon,
           });
+          // Update local cache and UI
+          if (!this._favoriteIds) this._favoriteIds = new Set();
+          this._favoriteIds.add(story.id);
           favAction.textContent = '✓ Tersimpan';
+          favAction.setAttribute('aria-pressed', 'true');
           // refresh favorites list
-          this._renderFavoritesList();
+          await this._renderFavoritesList();
         } catch (err) {
           console.error('Gagal menyimpan favorit:', err);
           alert('Gagal menyimpan favorit. Coba lagi.');
+          favAction.disabled = false;
         }
       });
+
       // let user find actions area
       const contentEl = storyItem.querySelector('.story-item__content') || storyItem;
       contentEl.appendChild(favAction);
@@ -208,7 +228,18 @@ class StoriesPage {
         removeBtn.addEventListener('click', async () => {
           try {
             await IdbHelper.deleteFavorite(fav.id);
+            // update local favorite ids and UI
+            if (this._favoriteIds && this._favoriteIds.has(fav.id)) {
+              this._favoriteIds.delete(fav.id);
+            }
             this._renderFavoritesList();
+            // update story list buttons if present
+            const btn = document.querySelector(`button[data-story-id="${fav.id}"]`);
+            if (btn) {
+              btn.textContent = '★ Simpan';
+              btn.disabled = false;
+              btn.setAttribute('aria-pressed', 'false');
+            }
           } catch (err) {
             console.error('Gagal hapus favorit:', err);
             alert('Gagal menghapus favorit. Coba lagi.');

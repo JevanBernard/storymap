@@ -79,6 +79,18 @@ const IdbHelper = {
     const db = await dbPromise;
     return db.delete(FAVORITES_STORE_NAME, id);
   },
+  // Cek apakah story sudah menjadi favorit
+  async isFavorite(id) {
+    if (!id) return false;
+    const db = await dbPromise;
+    try {
+      const fav = await db.get(FAVORITES_STORE_NAME, id);
+      return !!fav;
+    } catch (err) {
+      console.warn('isFavorite check failed:', err.message);
+      return false;
+    }
+  },
   // PUSH SUBSCRIPTIONS: simpan, ambil semua, hapus
   async saveSubscription(subscription) {
     const db = await dbPromise;

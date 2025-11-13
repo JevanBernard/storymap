@@ -152,8 +152,20 @@ class StoryApi {
       if (responseJson.error) throw new Error(responseJson.message || 'Gagal menyimpan subscription');
       return responseJson;
     } catch (error) {
-      console.error('registerPushSubscription failed:', error.message);
-      throw error;
+      console.error('registerPushSubscription failed on primary API:', error.message);
+      // Fallback: try local push server (useful for testing)
+      try {
+        const localResp = await fetch('http://localhost:4000/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscription),
+        });
+        if (!localResp.ok) throw new Error('Local push server responded with ' + localResp.status);
+        return await localResp.json();
+      } catch (localErr) {
+        console.error('Local push server fallback failed:', localErr.message);
+        throw error; // rethrow original
+      }
     }
   }
 
@@ -182,8 +194,20 @@ class StoryApi {
       if (responseJson.error) throw new Error(responseJson.message || 'Gagal menghapus subscription');
       return responseJson;
     } catch (error) {
-      console.error('unregisterPushSubscription failed:', error.message);
-      throw error;
+      console.error('unregisterPushSubscription failed on primary API:', error.message);
+      // Fallback to local push server
+      try {
+        const localResp = await fetch('http://localhost:4000/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint }),
+        });
+        if (!localResp.ok) throw new Error('Local push server responded with ' + localResp.status);
+        return await localResp.json();
+      } catch (localErr) {
+        console.error('Local push server fallback failed:', localErr.message);
+        throw error;
+      }
     }
   }
 }

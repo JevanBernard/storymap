@@ -1,4 +1,6 @@
-const VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk'; 
+const DEFAULT_VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
+// Local dev push server (fallback). Change if your local push server runs on different port.
+const LOCAL_PUSH_SERVER = 'http://localhost:4000';
 
 // Mengubah string VAPID key ke Uint8Array
 function _urlB64ToUint8Array(base64String) {
@@ -31,21 +33,44 @@ async function subscribePush() {
   }
 
   const registration = await navigator.serviceWorker.ready;
+  // Try to get VAPID public key from local push server (dev) first, otherwise use default.
+  let vapidKey = DEFAULT_VAPID_PUBLIC_KEY;
+  try {
+    const resp = await fetch(`${LOCAL_PUSH_SERVER}/` , { method: 'GET' });
+    if (resp.ok) {
+      const j = await resp.json();
+      if (j.vapidPublicKey) vapidKey = j.vapidPublicKey;
+    }
+  } catch (err) {
+    // ignore — fallback to default key
+  }
+
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: _urlB64ToUint8Array(VAPID_PUBLIC_KEY),
+    applicationServerKey: _urlB64ToUint8Array(vapidKey),
   });
   
   console.log('Push subscription berhasil:', subscription);
   // Simpan subscription ke server (jika tersedia) dan lokal di IndexedDB
-  try {
-    // Kirim ke server jika user sudah login
     try {
-      await StoryApi.registerPushSubscription(subscription);
-      console.log('Subscription dikirim ke server.');
-    } catch (serverErr) {
-      console.warn('Gagal mengirim subscription ke server (mungkin endpoint tidak tersedia):', serverErr.message);
-    }
+      // Kirim ke server jika user sudah login. StoryApi will attempt primary API then fallback to local push-server.
+      try {
+        await StoryApi.registerPushSubscription(subscription);
+        console.log('Subscription dikirim ke server.');
+      } catch (serverErr) {
+        console.warn('Gagal mengirim subscription ke server (mungkin endpoint tidak tersedia):', serverErr.message);
+        // As a last resort, try posting directly to local push server
+        try {
+          await fetch(`${LOCAL_PUSH_SERVER}/subscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(subscription),
+          });
+          console.log('Subscription dikirim ke local push server.');
+        } catch (localErr) {
+          console.warn('Gagal mengirim subscription ke local push server:', localErr.message);
+        }
+      }
 
     // Simpan juga di IndexedDB agar tersedia saat offline
     const plainSub = JSON.parse(JSON.stringify(subscription));

@@ -30,6 +30,9 @@ class StoriesPage {
         <div class="favorites-controls">
           <button id="show-favorites-btn" class="btn">Lihat Favorit</button>
         </div>
+        <div id="favorites-search-container" style="display:none; margin-bottom: 16px;">
+          <input type="text" id="favorites-search" placeholder="Cari favorit berdasarkan judul..." class="search-input" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
         <div id="favorites-list-container" class="story-list" style="display:none; margin-bottom: 16px;"></div>
         <div id="map"></div>
         <h3>Daftar Cerita</h3>
@@ -46,6 +49,7 @@ class StoriesPage {
       this._initMap(stories);
       // Load favorites ids into a Set for fast lookup
       this._favoriteIds = new Set((await IdbHelper.getAllFavorites()).map(f => f.id));
+      this._allFavorites = await IdbHelper.getAllFavorites(); // Store all favorites for search
       this._renderStoryList(stories);
       // Render favorites list dan pasang listener
       await this._renderFavoritesList();
@@ -53,8 +57,19 @@ class StoriesPage {
       if (favBtn) {
         favBtn.addEventListener('click', () => {
           const favContainer = document.getElementById('favorites-list-container');
+          const searchContainer = document.getElementById('favorites-search-container');
           if (!favContainer) return;
-          favContainer.style.display = favContainer.style.display === 'none' ? 'block' : 'none';
+          const isHidden = favContainer.style.display === 'none';
+          favContainer.style.display = isHidden ? 'block' : 'none';
+          if (searchContainer) searchContainer.style.display = isHidden ? 'block' : 'none';
+        });
+      }
+      // Pasang listener search
+      const searchInput = document.getElementById('favorites-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase().trim();
+          this._filterFavorites(query);
         });
       }
     } catch (error) {
@@ -212,54 +227,82 @@ class StoriesPage {
     if (!favContainer) return;
     try {
       const favorites = await IdbHelper.getAllFavorites();
+      this._allFavorites = favorites; // Store for search/filter
       if (!favorites || favorites.length === 0) {
         favContainer.innerHTML = '<p class="story-item story-item--no-image">Belum ada favorit tersimpan.</p>';
         return;
       }
-      favContainer.innerHTML = '';
-      favorites.forEach(fav => {
-        const favItem = document.createElement('article');
-        favItem.classList.add('story-item');
-        const favHTML = `
-          <div class="story-item__content">
-            <h4 class="story-item__title">${fav.name || 'Cerita Tanpa Nama'}</h4>
-            <span class="story-item__date">${this._formatDate(fav.createdAt || Date.now())}</span>
-            <p class="story-item__description">${(fav.description || '').substring(0, 140)}</p>
-          </div>
-        `;
-        favItem.innerHTML = favHTML;
-
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'btn btn--small btn--danger';
-        removeBtn.textContent = 'Hapus';
-        removeBtn.addEventListener('click', async () => {
-          try {
-            await IdbHelper.deleteFavorite(fav.id);
-            // update local favorite ids and UI
-            if (this._favoriteIds && this._favoriteIds.has(fav.id)) {
-              this._favoriteIds.delete(fav.id);
-            }
-            this._renderFavoritesList();
-            // update story list buttons if present
-            const btn = document.querySelector(`button[data-story-id="${fav.id}"]`);
-            if (btn) {
-              btn.textContent = '★ Simpan';
-              btn.disabled = false;
-              btn.setAttribute('aria-pressed', 'false');
-            }
-          } catch (err) {
-            console.error('Gagal hapus favorit:', err);
-            alert('Gagal menghapus favorit. Coba lagi.');
-          }
-        });
-
-        favItem.appendChild(removeBtn);
-        favContainer.appendChild(favItem);
-      });
+      this._renderFavoritesContent(favorites);
     } catch (err) {
       console.error('Gagal memuat favorit:', err);
       favContainer.innerHTML = '<p class="story-item story-item--no-image">Gagal memuat favorit.</p>';
     }
+  }
+
+  _renderFavoritesContent(favorites) {
+    const favContainer = document.getElementById('favorites-list-container');
+    if (!favContainer) return;
+    
+    if (!favorites || favorites.length === 0) {
+      favContainer.innerHTML = '<p class="story-item story-item--no-image">Belum ada favorit sesuai pencarian.</p>';
+      return;
+    }
+    
+    favContainer.innerHTML = '';
+    favorites.forEach(fav => {
+      const favItem = document.createElement('article');
+      favItem.classList.add('story-item');
+      const favHTML = `
+        <div class="story-item__content">
+          <h4 class="story-item__title">${fav.name || 'Cerita Tanpa Nama'}</h4>
+          <span class="story-item__date">${this._formatDate(fav.createdAt || Date.now())}</span>
+          <p class="story-item__description">${(fav.description || '').substring(0, 140)}</p>
+        </div>
+      `;
+      favItem.innerHTML = favHTML;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'btn btn--small btn--danger';
+      removeBtn.textContent = 'Hapus';
+      removeBtn.addEventListener('click', async () => {
+        try {
+          await IdbHelper.deleteFavorite(fav.id);
+          // update local favorite ids and UI
+          if (this._favoriteIds && this._favoriteIds.has(fav.id)) {
+            this._favoriteIds.delete(fav.id);
+          }
+          this._renderFavoritesList();
+          // update story list buttons if present
+          const btn = document.querySelector(`button[data-story-id="${fav.id}"]`);
+          if (btn) {
+            btn.innerHTML = `<span class="fav-icon" aria-hidden="true">★</span><span class="fav-label">Simpan</span>`;
+            btn.classList.remove('saved');
+            btn.disabled = false;
+            btn.setAttribute('aria-pressed', 'false');
+          }
+        } catch (err) {
+          console.error('Gagal hapus favorit:', err);
+          alert('Gagal menghapus favorit. Coba lagi.');
+        }
+      });
+
+      favItem.appendChild(removeBtn);
+      favContainer.appendChild(favItem);
+    });
+  }
+
+  _filterFavorites(query) {
+    if (!this._allFavorites) return;
+    
+    let filtered = this._allFavorites;
+    if (query) {
+      filtered = this._allFavorites.filter(fav => 
+        (fav.name || '').toLowerCase().includes(query) ||
+        (fav.description || '').toLowerCase().includes(query)
+      );
+    }
+    
+    this._renderFavoritesContent(filtered);
   }
 }
 

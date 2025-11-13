@@ -156,15 +156,21 @@ class StoriesPage {
       const favAction = document.createElement('button');
       favAction.className = 'btn btn--small btn--favorite';
       favAction.setAttribute('data-story-id', story.id || '');
+      favAction.setAttribute('aria-label', `Simpan cerita ${storyName}`);
+
+      // Icon + label structure
+      favAction.innerHTML = `
+        <span class="fav-icon" aria-hidden="true">★</span>
+        <span class="fav-label">Simpan</span>
+      `;
+
       // Jika sudah ada di favorites, tampilkan state tersimpan
       const isFav = story.id && this._favoriteIds && this._favoriteIds.has(story.id);
       if (isFav) {
-        favAction.textContent = '✓ Tersimpan';
+        favAction.classList.add('saved');
+        favAction.querySelector('.fav-label').textContent = 'Tersimpan';
         favAction.disabled = true;
         favAction.setAttribute('aria-pressed', 'true');
-      } else {
-        favAction.textContent = '★ Simpan';
-        favAction.setAttribute('aria-pressed', 'false');
       }
 
       favAction.addEventListener('click', async () => {
@@ -183,7 +189,8 @@ class StoriesPage {
           // Update local cache and UI
           if (!this._favoriteIds) this._favoriteIds = new Set();
           this._favoriteIds.add(story.id);
-          favAction.textContent = '✓ Tersimpan';
+          favAction.classList.add('saved');
+          favAction.querySelector('.fav-label').textContent = 'Tersimpan';
           favAction.setAttribute('aria-pressed', 'true');
           // refresh favorites list
           await this._renderFavoritesList();

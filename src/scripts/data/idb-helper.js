@@ -21,13 +21,13 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
     if (oldVersion < 2 || !db.objectStoreNames.contains(AUTH_STORE_NAME)) {
       db.createObjectStore(AUTH_STORE_NAME);
     }
-    // Buat object store 'favorites' untuk menyimpan cerita favorit (id dari API sebagai key)
+    // object store 'favorites' menyimpan cerita favorit (id dari API sebagai key)
     if (oldVersion < 3 || !db.objectStoreNames.contains(FAVORITES_STORE_NAME)) {
       db.createObjectStore(FAVORITES_STORE_NAME, {
         keyPath: 'id',
       });
     }
-    // Buat object store untuk menyimpan push subscription secara lokal
+    // object store menyimpan push subscription secara lokal
     if (oldVersion < 4 || !db.objectStoreNames.contains(SUBSCRIPTIONS_STORE_NAME)) {
       db.createObjectStore(SUBSCRIPTIONS_STORE_NAME, {
         keyPath: 'endpoint',
@@ -67,7 +67,6 @@ const IdbHelper = {
   // FAVORITES: menyimpan, mengambil semua, menghapus
   async addFavorite(story) {
     const db = await dbPromise;
-    // Pastikan story punya id; kalau tidak, buat id timestamp
     if (!story.id) story.id = `fav-${Date.now()}`;
     return db.put(FAVORITES_STORE_NAME, story);
   },
@@ -94,7 +93,6 @@ const IdbHelper = {
   // PUSH SUBSCRIPTIONS: simpan, ambil semua, hapus
   async saveSubscription(subscription) {
     const db = await dbPromise;
-    // subscription should be a plain object (not including functions)
     return db.put(SUBSCRIPTIONS_STORE_NAME, subscription);
   },
   async getAllSubscriptions() {

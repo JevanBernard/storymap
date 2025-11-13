@@ -33,7 +33,6 @@ async function subscribePush() {
   }
 
   const registration = await navigator.serviceWorker.ready;
-  // Try to get VAPID public key from local push server (dev) first, otherwise use default.
   let vapidKey = DEFAULT_VAPID_PUBLIC_KEY;
   try {
     const resp = await fetch(`${LOCAL_PUSH_SERVER}/` , { method: 'GET' });
@@ -42,7 +41,6 @@ async function subscribePush() {
       if (j.vapidPublicKey) vapidKey = j.vapidPublicKey;
     }
   } catch (err) {
-    // ignore — fallback to default key
   }
 
   const subscription = await registration.pushManager.subscribe({
@@ -51,15 +49,12 @@ async function subscribePush() {
   });
   
   console.log('Push subscription berhasil:', subscription);
-  // Simpan subscription ke server (jika tersedia) dan lokal di IndexedDB
     try {
-      // Kirim ke server jika user sudah login. StoryApi will attempt primary API then fallback to local push-server.
       try {
         await StoryApi.registerPushSubscription(subscription);
         console.log('Subscription dikirim ke server.');
       } catch (serverErr) {
         console.warn('Gagal mengirim subscription ke server (mungkin endpoint tidak tersedia):', serverErr.message);
-        // As a last resort, try posting directly to local push server
         try {
           await fetch(`${LOCAL_PUSH_SERVER}/subscribe`, {
             method: 'POST',
@@ -72,7 +67,6 @@ async function subscribePush() {
         }
       }
 
-    // Simpan juga di IndexedDB agar tersedia saat offline
     const plainSub = JSON.parse(JSON.stringify(subscription));
     await IdbHelper.saveSubscription(plainSub);
   } catch (err) {

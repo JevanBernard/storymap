@@ -47,11 +47,9 @@ class StoriesPage {
     try {
       const stories = await StoryApi.getAllStories();
       this._initMap(stories);
-      // Load favorites ids into a Set for fast lookup
       this._favoriteIds = new Set((await IdbHelper.getAllFavorites()).map(f => f.id));
       this._allFavorites = await IdbHelper.getAllFavorites(); // Store all favorites for search
       this._renderStoryList(stories);
-      // Render favorites list dan pasang listener
       await this._renderFavoritesList();
       const favBtn = document.getElementById('show-favorites-btn');
       if (favBtn) {
@@ -173,7 +171,7 @@ class StoriesPage {
       favAction.setAttribute('data-story-id', story.id || '');
       favAction.setAttribute('aria-label', `Simpan cerita ${storyName}`);
 
-      // Icon + label structure
+      // Icon + label
       favAction.innerHTML = `
         <span class="fav-icon" aria-hidden="true">★</span>
         <span class="fav-label">Simpan</span>
@@ -207,7 +205,7 @@ class StoriesPage {
           favAction.classList.add('saved');
           favAction.querySelector('.fav-label').textContent = 'Tersimpan';
           favAction.setAttribute('aria-pressed', 'true');
-          // refresh favorites list
+          // refresh favorit list
           await this._renderFavoritesList();
         } catch (err) {
           console.error('Gagal menyimpan favorit:', err);
@@ -216,7 +214,6 @@ class StoriesPage {
         }
       });
 
-      // let user find actions area
       const contentEl = storyItem.querySelector('.story-item__content') || storyItem;
       contentEl.appendChild(favAction);
     });
@@ -227,7 +224,7 @@ class StoriesPage {
     if (!favContainer) return;
     try {
       const favorites = await IdbHelper.getAllFavorites();
-      this._allFavorites = favorites; // Store for search/filter
+      this._allFavorites = favorites;
       if (!favorites || favorites.length === 0) {
         favContainer.innerHTML = '<p class="story-item story-item--no-image">Belum ada favorit tersimpan.</p>';
         return;
@@ -267,12 +264,10 @@ class StoriesPage {
       removeBtn.addEventListener('click', async () => {
         try {
           await IdbHelper.deleteFavorite(fav.id);
-          // update local favorite ids and UI
           if (this._favoriteIds && this._favoriteIds.has(fav.id)) {
             this._favoriteIds.delete(fav.id);
           }
           this._renderFavoritesList();
-          // update story list buttons if present
           const btn = document.querySelector(`button[data-story-id="${fav.id}"]`);
           if (btn) {
             btn.innerHTML = `<span class="fav-icon" aria-hidden="true">★</span><span class="fav-label">Simpan</span>`;

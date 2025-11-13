@@ -2,7 +2,7 @@
   "name": "Story Map App",
   "short_name": "StoryMap",
   "description": "Aplikasi PWA untuk berbagi cerita berbasis lokasi.",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#F0F4FA",
   "theme_color": "#6D28D9",

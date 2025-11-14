@@ -57,13 +57,29 @@ class StoriesPage {
       const favBtn = document.getElementById('show-favorites-btn');
       if (favBtn) {
         favBtn.addEventListener('click', () => {
-          const favContainer = document.getElementById('favorites-list-container');
-          const searchContainer = document.getElementById('favorites-search-container');
-          if (!favContainer) return;
-          const isHidden = favContainer.style.display === 'none';
-          favContainer.style.display = isHidden ? 'block' : 'none';
-          if (searchContainer) searchContainer.style.display = isHidden ? 'block' : 'none';
+          const favWrapper = document.getElementById('favorites-section-wrapper');
+          if (!favWrapper) return;
+          const isHidden = favWrapper.style.display === 'none' || favWrapper.style.display === '';
+          favWrapper.style.display = isHidden ? 'block' : 'none';
+          // Ensure favorites are (re)rendered when shown
+          if (isHidden) {
+            this._renderFavoritesList().catch(err => console.error('Failed to render favorites:', err));
+          }
         });
+      }
+      // Auto-show favorites on wider viewports (desktop) for better discoverability
+      try {
+        const favWrapper = document.getElementById('favorites-section-wrapper');
+        if (favWrapper) {
+          const shouldAutoShow = window.innerWidth >= 768; // breakpoint for desktop
+          if (shouldAutoShow) {
+            favWrapper.style.display = 'block';
+            // ensure favorites content is rendered
+            this._renderFavoritesList().catch(err => console.error('Failed to auto-render favorites on desktop:', err));
+          }
+        }
+      } catch (e) {
+        console.warn('Auto-show favorites check failed:', e.message);
       }
       // Pasang listener search
       const searchInput = document.getElementById('favorites-search');

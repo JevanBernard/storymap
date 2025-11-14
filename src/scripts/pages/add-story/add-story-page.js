@@ -227,7 +227,7 @@ class AddStoryPage {
         await StoryApi.addStory(formData);
         
         this._capturedFile = null;
-        alert('Cerita baru berhasil ditambahkan! (Online)');
+        await this._notify('Cerita baru berhasil ditambahkan', 'Cerita telah berhasil diunggah.');
         window.location.hash = '#/stories';
       
       } else {
@@ -245,11 +245,59 @@ class AddStoryPage {
       }
       
       this._capturedFile = null;
-      alert('Kamu sedang offline. Cerita disimpan dan akan di-upload otomatis saat kembali online.');
+      await this._notify('Cerita disimpan (offline)', 'Cerita disimpan dan akan di-upload otomatis saat kembali online.');
       window.location.hash = '#/stories'; 
     } finally {
       button.textContent = 'Upload Cerita';
       button.disabled = false;
+    }
+  }
+
+  async _notify(title, body) {
+    try {
+      console.debug('[AddStory][_notify] called', { title, body, permission: typeof Notification !== 'undefined' ? Notification.permission : 'unsupported' });
+      if (typeof Notification === 'undefined') {
+        alert(body);
+        return;
+      }
+
+      if (Notification.permission === 'default') {
+        await Notification.requestPermission();
+      }
+
+      console.debug('[AddStory][_notify] permission after request:', Notification.permission);
+
+      if (Notification.permission === 'granted') {
+        // Prefer showing notification via the active service worker registration
+        if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+          const registration = await navigator.serviceWorker.ready;
+          console.debug('[AddStory][_notify] serviceWorker registration ready:', !!registration && typeof registration.showNotification === 'function');
+          if (registration && registration.showNotification) {
+            await registration.showNotification(title, {
+              body,
+              icon: 'icons/icon-192x192.png',
+              badge: 'icons/icon-192x192.png',
+              data: { url: '/#/stories' },
+            });
+            return;
+          }
+        }
+
+        // Fallback to window Notification constructor
+        try {
+          // eslint-disable-next-line no-new
+          new Notification(title, { body, icon: 'icons/icon-192x192.png' });
+          return;
+        } catch (err) {
+          console.warn('Notification constructor failed:', err.message);
+        }
+      }
+
+      // If permission denied or other failures, fallback to alert
+      alert(body);
+    } catch (err) {
+      console.warn('Gagal menampilkan notifikasi:', err.message);
+      alert(body);
     }
   }
 

@@ -249,14 +249,30 @@ class StoriesPage {
     favorites.forEach(fav => {
       const favItem = document.createElement('article');
       favItem.classList.add('story-item');
-      const favHTML = `
-        <div class="story-item__content">
-          <h4 class="story-item__title">${fav.name || 'Cerita Tanpa Nama'}</h4>
-          <span class="story-item__date">${this._formatDate(fav.createdAt || Date.now())}</span>
-          <p class="story-item__description">${(fav.description || '').substring(0, 140)}</p>
-        </div>
-      `;
-      favItem.innerHTML = favHTML;
+      
+      // Check if favorite has photo
+      if (fav.photoUrl) {
+        favItem.classList.add('story-item--with-image');
+        const favHTML = `
+          <img src="${fav.photoUrl}" alt="Favorit oleh ${fav.name}: ${(fav.description || '').substring(0, 50)}...">
+          <div class="story-item__content">
+            <h4 class="story-item__title">${fav.name || 'Cerita Tanpa Nama'}</h4>
+            <span class="story-item__date">${this._formatDate(fav.createdAt || Date.now())}</span>
+            <p class="story-item__description">${(fav.description || '').substring(0, 140)}</p>
+          </div>
+        `;
+        favItem.innerHTML = favHTML;
+      } else {
+        favItem.classList.add('story-item--no-image');
+        const favHTML = `
+          <div class="story-item__content">
+            <h4 class="story-item__title">${fav.name || 'Cerita Tanpa Nama'}</h4>
+            <span class="story-item__date">${this._formatDate(fav.createdAt || Date.now())}</span>
+            <p class="story-item__description">${(fav.description || '').substring(0, 140)}</p>
+          </div>
+        `;
+        favItem.innerHTML = favHTML;
+      }
 
       const removeBtn = document.createElement('button');
       removeBtn.className = 'btn btn--small btn--danger';
@@ -268,6 +284,7 @@ class StoriesPage {
             this._favoriteIds.delete(fav.id);
           }
           this._renderFavoritesList();
+          // Update story list button
           const btn = document.querySelector(`button[data-story-id="${fav.id}"]`);
           if (btn) {
             btn.innerHTML = `<span class="fav-icon" aria-hidden="true">★</span><span class="fav-label">Simpan</span>`;

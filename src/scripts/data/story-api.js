@@ -134,7 +134,7 @@ class StoryApi {
     }
 
     try {
-      const response = await fetch(`${STORY_API_BASE_URL}/subscribe`, {
+      const response = await fetch(`${STORY_API_BASE_URL}/notifications/subscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ class StoryApi {
     }
 
     try {
-      const response = await fetch(`${STORY_API_BASE_URL}/unsubscribe`, {
+      const response = await fetch(`${STORY_API_BASE_URL}/notifications/unsubscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

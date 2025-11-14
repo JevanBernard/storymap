@@ -30,10 +30,13 @@ class StoriesPage {
         <div class="favorites-controls">
           <button id="show-favorites-btn" class="btn">Lihat Favorit</button>
         </div>
-        <div id="favorites-search-container" style="display:none; margin-bottom: 16px;">
-          <input type="text" id="favorites-search" placeholder="Cari favorit berdasarkan judul..." class="search-input" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px;">
-        </div>
-        <div id="favorites-list-container" class="story-list" style="display:none; margin-bottom: 16px;"></div>
+          <div id="favorites-section-wrapper" style="display:none; margin-bottom: 24px; padding: 16px; background: #f9fafb; border-radius: 8px;">
+            <h3 style="margin-top: 0; margin-bottom: 12px;">Cerita Favorit Saya</h3>
+            <div id="favorites-search-container" style="margin-bottom: 16px;">
+              <input type="text" id="favorites-search" placeholder="Cari favorit berdasarkan judul..." class="search-input" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div id="favorites-list-container" class="story-list" style="min-height: 100px;"></div>
+          </div>
         <div id="map"></div>
         <h3>Daftar Cerita</h3>
         <div id="story-list-container" class="story-list">
@@ -41,7 +44,7 @@ class StoriesPage {
         </div>
       </section>
     `;
-  }
+    }
 
   async afterRender() {
     try {

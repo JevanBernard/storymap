@@ -28,29 +28,29 @@ class StoriesPage {
         <h2>Jelajahi Cerita di Peta</h2>
         <p>Lihat cerita dari seluruh penjuru!</p>
         
-        <!-- Left Column: Map + Favorites (Grid Container) -->
-        <div class="stories-content-grid">
-          <div class="left-column">
-            <div id="map" class="map-container"></div>
-            
-            <!-- Favorites Section -->
-            <div id="favorites-section-wrapper" class="favorites-section-wrapper" style="display:none;">
-              <h3 class="favorites-section-title">Cerita Favorit Saya</h3>
-              <div id="favorites-search-container" class="favorites-search-container">
-                <input type="text" id="favorites-search" placeholder="Cari favorit berdasarkan judul..." class="search-input">
-              </div>
-              <div id="favorites-list-container" class="story-list favorites-list">
-                <p class="favorites-empty">Memuat favorit...</p>
-              </div>
+        <!-- Left Column: Map + Favorites -->
+        <div class="left-column">
+          <div id="map" class="map-container"></div>
+          
+          <!-- Favorites Section -->
+          <div id="favorites-section-wrapper" class="favorites-section-wrapper" style="display:none;">
+            <h3 class="favorites-section-title">Cerita Favorit Saya</h3>
+            <div id="favorites-search-container" class="favorites-search-container">
+              <input type="text" id="favorites-search" placeholder="Cari favorit berdasarkan judul..." class="search-input">
+            </div>
+            <div id="favorites-list-container" class="story-list favorites-list">
+              <p class="favorites-empty">Memuat favorit...</p>
             </div>
           </div>
         </div>
 
-        <!-- Right Column: Stories List (Outside Grid) -->
-        <div class="right-column stories-section">
-          <h3>Daftar Cerita</h3>
-          <div id="story-list-container" class="story-list">
-            <p>Memuat cerita...</p>
+        <!-- Right Column: Stories List -->
+        <div class="right-column">
+          <div class="stories-section">
+            <h3>Daftar Cerita</h3>
+            <div id="story-list-container" class="story-list">
+              <p>Memuat cerita...</p>
+            </div>
           </div>
         </div>
 

@@ -652,13 +652,50 @@ footer {
   }
 }
 
+/* ===== Stories Page Layout ===== */
+
+.stories-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.map-container {
+  width: 100%;
+  height: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stories-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.stories-section h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
 /* Favorites Section Styling */
 .favorites-section-wrapper {
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   padding: 24px;
-  margin-bottom: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 

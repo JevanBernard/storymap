@@ -28,21 +28,26 @@ class StoriesPage {
         <h2>Jelajahi Cerita di Peta</h2>
         <p>Lihat cerita dari seluruh penjuru!</p>
         
-        <!-- Favorites Section (Top on Desktop) -->
-        <div id="favorites-section-wrapper" class="favorites-section-wrapper" style="display:none;">
-          <h3 class="favorites-section-title">Cerita Favorit Saya</h3>
-          <div id="favorites-search-container" class="favorites-search-container">
-            <input type="text" id="favorites-search" placeholder="Cari favorit berdasarkan judul..." class="search-input">
-          </div>
-          <div id="favorites-list-container" class="story-list favorites-list">
-            <p class="favorites-empty">Memuat favorit...</p>
-          </div>
-        </div>
-
-        <!-- Map & Stories Grid -->
+        <!-- Main 2-Column Layout: Left (Map + Favorites), Right (Stories) -->
         <div class="stories-content-grid">
-          <div id="map" class="map-container"></div>
-          <div class="stories-section">
+          <!-- Left Column: Map + Favorites -->
+          <div class="left-column">
+            <div id="map" class="map-container"></div>
+            
+            <!-- Favorites Section -->
+            <div id="favorites-section-wrapper" class="favorites-section-wrapper" style="display:none;">
+              <h3 class="favorites-section-title">Cerita Favorit Saya</h3>
+              <div id="favorites-search-container" class="favorites-search-container">
+                <input type="text" id="favorites-search" placeholder="Cari favorit berdasarkan judul..." class="search-input">
+              </div>
+              <div id="favorites-list-container" class="story-list favorites-list">
+                <p class="favorites-empty">Memuat favorit...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Stories List -->
+          <div class="right-column stories-section">
             <h3>Daftar Cerita</h3>
             <div id="story-list-container" class="story-list">
               <p>Memuat cerita...</p>
@@ -82,13 +87,10 @@ class StoriesPage {
       // Auto-show favorites on wider viewports (desktop) for better discoverability
       try {
         const favWrapper = document.getElementById('favorites-section-wrapper');
-        if (favWrapper) {
-          const shouldAutoShow = window.innerWidth >= 768; // breakpoint for desktop
-          if (shouldAutoShow) {
-            favWrapper.style.display = 'block';
-            // ensure favorites content is rendered
-            this._renderFavoritesList().catch(err => console.error('Failed to auto-render favorites on desktop:', err));
-          }
+        if (favWrapper && window.innerWidth >= 768) {
+          favWrapper.style.display = 'block';
+          // ensure favorites content is rendered
+          this._renderFavoritesList().catch(err => console.error('Failed to auto-render favorites on desktop:', err));
         }
       } catch (e) {
         console.warn('Auto-show favorites check failed:', e.message);

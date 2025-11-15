@@ -654,9 +654,7 @@ footer {
 /* ===== Stories Page Layout ===== */
 
 .stories-content-grid {
-  display: grid;
-  grid-template-columns: 0.7fr 1fr;
-  gap: 24px;
+  display: flex;
   margin-bottom: 32px;
 }
 
@@ -664,11 +662,13 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  flex-shrink: 0;
 }
 
 .right-column {
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .map-container {
@@ -770,12 +770,17 @@ footer {
 /* Mobile Layout */
 @media (max-width: 768px) {
   .stories-content-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    flex-direction: column;
+    margin-bottom: 16px;
+  }
+
+  .left-column {
+    width: 100%;
   }
 
   .map-container {
     height: 300px;
+    max-width: 100%;
   }
 
   .favorites-section-wrapper {

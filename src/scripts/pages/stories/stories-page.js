@@ -42,6 +42,11 @@ class StoriesPage {
               <p class="favorites-empty">Memuat favorit...</p>
             </div>
           </div>
+
+          <!-- Toggle Button (Below Map on Mobile) -->
+          <div class="favorites-controls">
+            <button id="show-favorites-btn" class="btn btn-favorites-toggle">Lihat Favorit</button>
+          </div>
         </div>
 
         <!-- Right Column: Stories List -->
@@ -52,11 +57,6 @@ class StoriesPage {
               <p>Memuat cerita...</p>
             </div>
           </div>
-        </div>
-
-        <!-- Toggle Button (Mobile) -->
-        <div class="favorites-controls">
-          <button id="show-favorites-btn" class="btn btn-favorites-toggle">Lihat Favorit</button>
         </div>
       </section>
     `;

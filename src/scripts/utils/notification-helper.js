@@ -29,51 +29,42 @@ async function requestNotificationPermission() {
 // Melakukan subscribe ke push notification
 async function subscribePush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    throw new Error('Push messaging tidak didukung.');
+    throw new Error('Push messaging tidak didukung pada browser Anda.');
   }
 
   const registration = await navigator.serviceWorker.ready;
-  let vapidKey = DEFAULT_VAPID_PUBLIC_KEY;
-  try {
-    const resp = await fetch(`${LOCAL_PUSH_SERVER}/` , { method: 'GET' });
-    if (resp.ok) {
-      const j = await resp.json();
-      if (j.vapidPublicKey) vapidKey = j.vapidPublicKey;
-    }
-  } catch (err) {
-  }
+  // Gunakan default VAPID key dari Dicoding API
+  const vapidKey = DEFAULT_VAPID_PUBLIC_KEY;
 
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: _urlB64ToUint8Array(vapidKey),
   });
   
-  console.log('Push subscription berhasil:', subscription);
-    try {
-      try {
-        await StoryApi.registerPushSubscription(subscription);
-        console.log('Subscription dikirim ke server.');
-      } catch (serverErr) {
-        console.warn('Gagal mengirim subscription ke server (mungkin endpoint tidak tersedia):', serverErr.message);
-        try {
-          await fetch(`${LOCAL_PUSH_SERVER}/subscribe`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(subscription),
-          });
-          console.log('Subscription dikirim ke local push server.');
-        } catch (localErr) {
-          console.warn('Gagal mengirim subscription ke local push server:', localErr.message);
-        }
-      }
-
+  console.log('Push subscription berhasil dibuat:', subscription);
+  
+  try {
+    // Kirim subscription ke server API Dicoding (endpoint harus terdaftar dengan token)
+    await StoryApi.registerPushSubscription(subscription);
+    console.log('Subscription berhasil dikirim ke server API Dicoding.');
+    
+    // Simpan subscription lokal juga untuk referensi
     const plainSub = JSON.parse(JSON.stringify(subscription));
     await IdbHelper.saveSubscription(plainSub);
+    console.log('Subscription disimpan ke IndexedDB.');
+    
+    return subscription;
   } catch (err) {
-    console.error('Gagal menyimpan subscription lokal:', err.message);
+    console.error('Gagal mendaftarkan subscription:', err.message);
+    // Jika gagal, unsubscribe dari browser dan hapus dari IDB
+    await subscription.unsubscribe();
+    try {
+      await IdbHelper.deleteSubscription(subscription.endpoint);
+    } catch (idbErr) {
+      console.warn('Gagal menghapus subscription dari IDB:', idbErr.message);
+    }
+    throw err; // Re-throw untuk ditangani di UI
   }
-
-  return subscription;
 }
 
 // Melakukan unsubscribe dari push notification
@@ -82,18 +73,29 @@ async function unsubscribePush() {
   const subscription = await registration.pushManager.getSubscription();
   if (subscription) {
     const endpoint = subscription.endpoint;
-    await subscription.unsubscribe();
-    console.log('Push subscription dibatalkan (local).');
-    // Hapus dari server dan lokal
     try {
-      await StoryApi.unregisterPushSubscription(endpoint);
+      // Unsubscribe dari browser
+      await subscription.unsubscribe();
+      console.log('Push subscription dibatalkan dari browser.');
+      
+      // Notifikasi server untuk membatalkan subscription
+      try {
+        await StoryApi.unregisterPushSubscription(endpoint);
+        console.log('Subscription dibatalkan dari server API Dicoding.');
+      } catch (err) {
+        console.warn('Gagal membatalkan subscription dari server:', err.message);
+      }
+      
+      // Hapus dari IndexedDB
+      try {
+        await IdbHelper.deleteSubscription(endpoint);
+        console.log('Subscription dihapus dari IndexedDB.');
+      } catch (err) {
+        console.warn('Gagal menghapus subscription dari IDB:', err.message);
+      }
     } catch (err) {
-      console.warn('Gagal memanggil endpoint unregister di server:', err.message);
-    }
-    try {
-      await IdbHelper.deleteSubscription(endpoint);
-    } catch (err) {
-      console.warn('Gagal menghapus subscription dari IDB:', err.message);
+      console.error('Gagal membatalkan subscription:', err.message);
+      throw err;
     }
   }
 }
@@ -124,7 +126,11 @@ async function initNotificationToggle() {
       toggle.checked = isChecked;
     } catch (error) {
       console.error('Gagal mengubah status notifikasi:', error.message);
-      alert(`Gagal: ${error.message}`);
+      // Tampilkan pesan error yang user-friendly
+      const errorMsg = error.message.includes('Token') ? 
+        'Silakan login terlebih dahulu untuk mengaktifkan notifikasi.' :
+        `${error.message || 'Gagal mengubah pengaturan notifikasi.'}`;
+      alert(errorMsg);
       toggle.checked = !isChecked;
     }
   });

@@ -687,6 +687,8 @@ footer {
 .stories-section h3 {
   margin-top: 0;
   margin-bottom: 16px;
+  font-size: 1.3rem;
+  color: var(--color-text-primary);
 }
 
 /* Favorites Section Styling */
@@ -738,7 +740,7 @@ footer {
 
 /* Delete Button Styling */
 .btn--danger {
-  background-color: var(--color-error);
+  background-color: #dc2626;
   color: white;
   border: none;
   padding: 8px 14px;
@@ -758,34 +760,6 @@ footer {
 
 .btn--danger:active {
   transform: scale(0.98);
-}
-
-/* Stories Content Grid - Desktop Layout */
-.stories-content-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.map-container {
-  width: 100%;
-  height: 500px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--shadow-medium);
-}
-
-.stories-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.stories-section h3 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  font-size: 1.3rem;
-  color: var(--color-text-primary);
 }
 
 .favorites-controls {
@@ -827,11 +801,6 @@ footer {
   }
 
   .btn-favorites-toggle:hover {
-    background-color: var(--color-primary-dark);
-    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
-  }
-
-  .btn-favorites-toggle:active {
-    transform: scale(0.98);
+    opacity: 0.9;
   }
 }

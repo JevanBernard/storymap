@@ -28,9 +28,8 @@ class StoriesPage {
         <h2>Jelajahi Cerita di Peta</h2>
         <p>Lihat cerita dari seluruh penjuru!</p>
         
-        <!-- Main 2-Column Layout: Left (Map + Favorites), Right (Stories) -->
+        <!-- Left Column: Map + Favorites (Grid Container) -->
         <div class="stories-content-grid">
-          <!-- Left Column: Map + Favorites -->
           <div class="left-column">
             <div id="map" class="map-container"></div>
             
@@ -45,13 +44,13 @@ class StoriesPage {
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Right Column: Stories List -->
-          <div class="right-column stories-section">
-            <h3>Daftar Cerita</h3>
-            <div id="story-list-container" class="story-list">
-              <p>Memuat cerita...</p>
-            </div>
+        <!-- Right Column: Stories List (Outside Grid) -->
+        <div class="right-column stories-section">
+          <h3>Daftar Cerita</h3>
+          <div id="story-list-container" class="story-list">
+            <p>Memuat cerita...</p>
           </div>
         </div>
 

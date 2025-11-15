@@ -783,8 +783,12 @@ footer {
     height: 300px;
   }
 
-  .favorites-section-wrapper {
+  #favorites-section-wrapper {
     display: none !important;
+  }
+
+  #favorites-section-wrapper.show {
+    display: block !important;
   }
 
   .favorites-controls {

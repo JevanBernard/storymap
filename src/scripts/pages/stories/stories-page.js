@@ -75,10 +75,9 @@ class StoriesPage {
         favBtn.addEventListener('click', () => {
           const favWrapper = document.getElementById('favorites-section-wrapper');
           if (!favWrapper) return;
-          const isHidden = favWrapper.style.display === 'none' || favWrapper.style.display === '';
-          favWrapper.style.display = isHidden ? 'block' : 'none';
-          // Ensure favorites are (re)rendered when shown
-          if (isHidden) {
+          favWrapper.classList.toggle('show');
+          // Ensure favorites are rendered when shown
+          if (favWrapper.classList.contains('show')) {
             this._renderFavoritesList().catch(err => console.error('Failed to render favorites:', err));
           }
         });

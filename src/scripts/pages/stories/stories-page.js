@@ -27,24 +27,36 @@ class StoriesPage {
       <section class="stories-page">
         <h2>Jelajahi Cerita di Peta</h2>
         <p>Lihat cerita dari seluruh penjuru!</p>
-        <div class="favorites-controls">
-          <button id="show-favorites-btn" class="btn">Lihat Favorit</button>
-        </div>
-          <div id="favorites-section-wrapper" style="display:none; margin-bottom: 24px; padding: 16px; background: #f9fafb; border-radius: 8px;">
-            <h3 style="margin-top: 0; margin-bottom: 12px;">Cerita Favorit Saya</h3>
-            <div id="favorites-search-container" style="margin-bottom: 16px;">
-              <input type="text" id="favorites-search" placeholder="Cari favorit berdasarkan judul..." class="search-input" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            </div>
-            <div id="favorites-list-container" class="story-list" style="min-height: 100px;"></div>
+        
+        <!-- Favorites Section (Top on Desktop) -->
+        <div id="favorites-section-wrapper" class="favorites-section-wrapper" style="display:none;">
+          <h3 class="favorites-section-title">Cerita Favorit Saya</h3>
+          <div id="favorites-search-container" class="favorites-search-container">
+            <input type="text" id="favorites-search" placeholder="Cari favorit berdasarkan judul..." class="search-input">
           </div>
-        <div id="map"></div>
-        <h3>Daftar Cerita</h3>
-        <div id="story-list-container" class="story-list">
-          <p>Memuat cerita...</p>
+          <div id="favorites-list-container" class="story-list favorites-list">
+            <p class="favorites-empty">Memuat favorit...</p>
+          </div>
+        </div>
+
+        <!-- Map & Stories Grid -->
+        <div class="stories-content-grid">
+          <div id="map" class="map-container"></div>
+          <div class="stories-section">
+            <h3>Daftar Cerita</h3>
+            <div id="story-list-container" class="story-list">
+              <p>Memuat cerita...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toggle Button (Mobile) -->
+        <div class="favorites-controls">
+          <button id="show-favorites-btn" class="btn btn-favorites-toggle">Lihat Favorit</button>
         </div>
       </section>
     `;
-    }
+  }
 
   async afterRender() {
     try {
@@ -260,19 +272,20 @@ class StoriesPage {
     if (!favContainer) return;
     
     if (!favorites || favorites.length === 0) {
-      favContainer.innerHTML = '<p class="story-item story-item--no-image">Belum ada favorit sesuai pencarian.</p>';
+      favContainer.innerHTML = '<p class="favorites-empty">Belum ada favorit sesuai pencarian.</p>';
       return;
     }
     
     favContainer.innerHTML = '';
     favorites.forEach(fav => {
       const favItem = document.createElement('article');
-      favItem.classList.add('story-item');
+      favItem.classList.add('story-item', 'favorite-item');
       
       // Check if favorite has photo
+      let itemHTML = '';
       if (fav.photoUrl) {
         favItem.classList.add('story-item--with-image');
-        const favHTML = `
+        itemHTML = `
           <img src="${fav.photoUrl}" alt="Favorit oleh ${fav.name}: ${(fav.description || '').substring(0, 50)}...">
           <div class="story-item__content">
             <h4 class="story-item__title">${fav.name || 'Cerita Tanpa Nama'}</h4>
@@ -280,22 +293,26 @@ class StoriesPage {
             <p class="story-item__description">${(fav.description || '').substring(0, 140)}</p>
           </div>
         `;
-        favItem.innerHTML = favHTML;
+        favItem.innerHTML = itemHTML;
       } else {
         favItem.classList.add('story-item--no-image');
-        const favHTML = `
+        itemHTML = `
           <div class="story-item__content">
             <h4 class="story-item__title">${fav.name || 'Cerita Tanpa Nama'}</h4>
             <span class="story-item__date">${this._formatDate(fav.createdAt || Date.now())}</span>
             <p class="story-item__description">${(fav.description || '').substring(0, 140)}</p>
           </div>
         `;
-        favItem.innerHTML = favHTML;
+        favItem.innerHTML = itemHTML;
       }
 
+      // Create delete button with clear visibility
       const removeBtn = document.createElement('button');
       removeBtn.className = 'btn btn--small btn--danger';
-      removeBtn.textContent = 'Hapus';
+      removeBtn.type = 'button';
+      removeBtn.setAttribute('aria-label', `Hapus favorit: ${fav.name}`);
+      removeBtn.innerHTML = '<span>✕</span> Hapus';
+      
       removeBtn.addEventListener('click', async () => {
         try {
           await IdbHelper.deleteFavorite(fav.id);

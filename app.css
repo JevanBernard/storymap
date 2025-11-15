@@ -794,9 +794,9 @@ footer {
   .favorites-controls {
     display: block;
     text-align: center;
-    margin-bottom: 24px;
-    padding: 16px 0;
-    grid-column: 1 / -1;
+    margin-top: 16px;
+    margin-bottom: 0;
+    padding: 0;
   }
 
   .btn-favorites-toggle {
@@ -809,6 +809,7 @@ footer {
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    width: 100%;
   }
 
   .btn-favorites-toggle:hover {

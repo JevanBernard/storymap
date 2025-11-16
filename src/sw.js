@@ -169,7 +169,7 @@ async function syncOfflineStories() {
           body: `Cerita "${story.description?.substring(0, 40) || 'tanpa judul'}" berhasil diupload.`,
           icon: 'icons/icon-192x192.png',
           badge: 'icons/icon-192x192.png',
-          data: { url: '/#/stories' }
+          data: { url: '/storymap/#/stories' }
         };
         try {
           await self.registration.showNotification(notifTitle, notifOptions);

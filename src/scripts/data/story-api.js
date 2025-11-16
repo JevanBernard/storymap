@@ -3,6 +3,7 @@ import IdbHelper from './idb-helper'; // Impor helper IDB
 const STORY_API_BASE_URL = 'https://story-api.dicoding.dev/v1';
 
 class StoryApi {
+  // ... (Fungsi _saveToken, getToken, logout, login, register, getAllStories, addStory tetap sama) ...
   static _saveToken(token) {
     localStorage.setItem('authToken', token);
   }
@@ -12,8 +13,8 @@ class StoryApi {
   }
 
   static async logout() {
-    localStorage.removeItem('authToken'); // Hapus dari localStorage
-    await IdbHelper.deleteToken(); // Hapus dari IndexedDB
+    localStorage.removeItem('authToken'); 
+    await IdbHelper.deleteToken(); 
   }
 
   static async login(email, password) {
@@ -43,7 +44,6 @@ class StoryApi {
   }
 
   static async register(name, email, password) {
-    // ... (kode register-mu sudah benar) ...
     try {
       const response = await fetch(`${STORY_API_BASE_URL}/register`, {
         method: 'POST',
@@ -77,7 +77,7 @@ class StoryApi {
       });
       
       if (response.status === 401) {
-       await this.logout(); // Panggil logout (async)
+       await this.logout();
         throw new Error('401 (Token tidak valid)');
       }
 
@@ -110,7 +110,7 @@ class StoryApi {
       });
       
       if (response.status === 401) {
-        await this.logout(); // Panggil logout (async)
+        await this.logout();
         throw new Error('401 (Token tidak valid)');
       }
 
@@ -134,6 +134,7 @@ class StoryApi {
     }
 
     try {
+      // Endpoint ini sudah benar (POST .../subscribe)
       const response = await fetch(`${STORY_API_BASE_URL}/notifications/subscribe`, {
         method: 'POST',
         headers: {
@@ -157,6 +158,9 @@ class StoryApi {
     }
   }
 
+  /**
+   * PERBAIKAN: Menggunakan method DELETE dan endpoint /subscribe
+   */
   static async unregisterPushSubscription(endpoint) {
     const token = this.getToken();
     if (!token) {
@@ -164,13 +168,15 @@ class StoryApi {
     }
 
     try {
+      // PERBAIKAN 1: URL-nya TETEAP /subscribe
+      // PERBAIKAN 2: Ganti method ke 'DELETE'
       const response = await fetch(`${STORY_API_BASE_URL}/notifications/subscribe`, {
-        method: 'POST',
+        method: 'DELETE', // <-- INI PERBAIKANNYA
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ endpoint }),
+        body: JSON.stringify({ endpoint }), // Body-nya sudah benar
       });
 
       if (response.status === 401) {

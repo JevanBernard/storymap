@@ -1,13 +1,12 @@
-// src/sw.js
-// PERBAIKAN: Membuat 'push' listener lebih robust (bisa menangani Teks atau JSON)
-
 import { precacheAndRoute } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate, CacheFirst } from 'workbox-strategies';
 import { clientsClaim, setCacheNameDetails } from 'workbox-core';
 
+// Helper IDB untuk ambil token & data
 import IdbHelper from './scripts/data/idb-helper';
 
+// URL API
 const STORY_API_BASE_URL = 'https://story-api.dicoding.dev/v1';
 
 setCacheNameDetails({
@@ -47,46 +46,23 @@ registerRoute(
   })
 );
 
-// --- Kriteria 2: PUSH NOTIFICATION ---
-
-/**
- * PERBAIKAN: 'push' listener sekarang bisa menangani JSON atau Teks Biasa
- */
+// PUSH NOTIFICATION (Sudah Benar)
 self.addEventListener('push', (event) => {
   console.log('Push event diterima:', event.data.text());
   
-  let data;
-  let notificationTitle;
-  let notificationOptions;
-
-  try {
-    // 1. Coba parsing sebagai JSON (untuk data dari API)
-    data = event.data.json();
-    notificationTitle = data.title || 'Notifikasi Baru';
-    notificationOptions = {
-      body: data.body || 'Kamu mendapat pesan baru.',
-      icon: data.icon || 'icons/icon-192x192.png',
-      badge: 'icons/icon-192x192.png',
-      data: {
-        url: data.url || '/#/stories' // Simpan URL untuk di-klik
-      },
-      actions: [
-        { action: 'explore-action', title: 'Lihat Sekarang' }
-      ]
-    };
-  } catch (e) {
-    // 2. Jika GAGAL, anggap sebagai Teks Biasa (untuk tes DevTools)
-    data = event.data.text();
-    notificationTitle = 'Notifikasi Tes';
-    notificationOptions = {
-      body: data, // Tampilkan teks mentah dari DevTools
-      icon: 'icons/icon-192x192.png',
-      badge: 'icons/icon-192x192.png',
-      data: {
-        url: '/#/stories' // Default URL
-      }
-    };
-  }
+  const data = event.data.json();
+  const notificationTitle = data.title || 'Notifikasi Baru';
+  const notificationOptions = {
+    body: data.body || 'Kamu mendapat pesan baru.',
+    icon: data.icon || 'icons/icon-192x192.png',
+    badge: 'icons/icon-192x192.png',
+    data: {
+      url: data.url || '/#/stories'
+    },
+    actions: [
+      { action: 'explore-action', title: 'Lihat Sekarang' }
+    ]
+  };
 
   event.waitUntil(
     self.registration.showNotification(notificationTitle, notificationOptions)
@@ -111,7 +87,7 @@ self.addEventListener('notificationclick', (event) => {
     );
 });
 
-// --- Kriteria 4 (Advanced): BACKGROUND SYNC (Sudah Benar) ---
+// BACKGROUND SYNC
 self.addEventListener('sync', (event) => {
   console.log('Event "sync" terdeteksi:', event.tag);
   if (event.tag === 'sync-offline-stories') {
@@ -163,6 +139,19 @@ async function syncOfflineStories() {
         
         await IdbHelper.deleteStory(story.id);
         console.log('Cerita ID:', story.id, 'berhasil disinkronkan.');
+        // Tampilkan notifikasi kecil ketika sebuah cerita offline berhasil diupload
+        const notifTitle = 'Cerita tersinkronisasi';
+        const notifOptions = {
+          body: `Cerita "${story.description?.substring(0, 40) || 'tanpa judul'}" berhasil diupload.`,
+          icon: 'icons/icon-192x192.png',
+          badge: 'icons/icon-192x192.png',
+          data: { url: '/#/stories' }
+        };
+        try {
+          await self.registration.showNotification(notifTitle, notifOptions);
+        } catch (err) {
+          console.warn('Gagal menampilkan notifikasi sinkronisasi:', err.message);
+        }
         
       } catch (uploadError) {
         console.error('Gagal sinkronisasi cerita ID:', story.id, uploadError.message);

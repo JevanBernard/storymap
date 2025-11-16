@@ -228,7 +228,7 @@ class AddStoryPage {
         
         this._capturedFile = null;
         await this._notify('Cerita baru berhasil ditambahkan', 'Cerita telah berhasil diunggah.');
-        window.location.hash = '#/stories';
+        window.location.hash = '/storymap/#/stories';
       
       } else {
         throw new Error('Offline. Data akan disimpan untuk sync.');

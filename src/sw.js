@@ -68,7 +68,7 @@ self.addEventListener('push', (event) => {
       icon: data.icon || 'icons/icon-192x192.png',
       badge: 'icons/icon-192x192.png',
       data: {
-        url: data.url || '/#/stories' // Simpan URL untuk di-klik
+        url: data.url || '/storymap/#/stories' // Simpan URL untuk di-klik
       },
       actions: [
         { action: 'explore-action', title: 'Lihat Sekarang' }
@@ -83,7 +83,7 @@ self.addEventListener('push', (event) => {
       icon: 'icons/icon-192x192.png',
       badge: 'icons/icon-192x192.png',
       data: {
-        url: '/#/stories' // Default URL
+        url: '/storymap/#/stories' // Default URL
       }
     };
   }

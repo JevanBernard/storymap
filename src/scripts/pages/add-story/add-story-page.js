@@ -228,7 +228,7 @@ class AddStoryPage {
         
         this._capturedFile = null;
         await this._notify('Cerita baru berhasil ditambahkan', 'Cerita telah berhasil diunggah.');
-        window.location.hash = '/storymap/#/stories';
+        window.location.hash = 'storymap/#/stories';
       
       } else {
         throw new Error('Offline. Data akan disimpan untuk sync.');
@@ -246,7 +246,7 @@ class AddStoryPage {
       
       this._capturedFile = null;
       await this._notify('Cerita disimpan (offline)', 'Cerita disimpan dan akan di-upload otomatis saat kembali online.');
-      window.location.hash = '#/stories'; 
+      window.location.hash = 'storymap/#/stories'; 
     } finally {
       button.textContent = 'Upload Cerita';
       button.disabled = false;
@@ -277,7 +277,7 @@ class AddStoryPage {
               body,
               icon: 'icons/icon-192x192.png',
               badge: 'icons/icon-192x192.png',
-              data: { url: '/#/stories' },
+              data: { url: '/storymap/#/stories' },
             });
             return;
           }

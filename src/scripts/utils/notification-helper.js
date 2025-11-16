@@ -33,8 +33,20 @@ async function subscribePush() {
   }
 
   const registration = await navigator.serviceWorker.ready;
-  // Gunakan default VAPID key dari Dicoding API
-  const vapidKey = DEFAULT_VAPID_PUBLIC_KEY;
+  // Coba ambil VAPID public key dari local push server (jika dijalankan),
+  // jika tidak tersedia gunakan DEFAULT_VAPID_PUBLIC_KEY.
+  let vapidKey = DEFAULT_VAPID_PUBLIC_KEY;
+  try {
+    const resp = await fetch(`${LOCAL_PUSH_SERVER}/` , { method: 'GET' });
+    if (resp.ok) {
+      const json = await resp.json();
+      if (json && json.vapidPublicKey) {
+        vapidKey = json.vapidPublicKey;
+      }
+    }
+  } catch (err) {
+    // local push server tidak tersedia — gunakan default
+  }
 
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
@@ -45,14 +57,31 @@ async function subscribePush() {
   
   try {
     // Kirim subscription ke server API Dicoding (endpoint harus terdaftar dengan token)
-    await StoryApi.registerPushSubscription(subscription);
-    console.log('Subscription berhasil dikirim ke server API Dicoding.');
-    
+    try {
+      await StoryApi.registerPushSubscription(subscription);
+      console.log('Subscription berhasil dikirim ke server API Dicoding.');
+    } catch (primaryErr) {
+      console.warn('Gagal kirim subscription ke API utama:', primaryErr.message);
+      // Coba fallback ke local push server jika tersedia
+      try {
+        await fetch(`${LOCAL_PUSH_SERVER}/subscribe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscription),
+        });
+        console.log('Subscription disimpan ke local push server sebagai fallback.');
+      } catch (fallbackErr) {
+        // Jika fallback juga gagal, buang error ke caller
+        console.error('Fallback ke local push server gagal:', fallbackErr.message);
+        throw primaryErr;
+      }
+    }
+
     // Simpan subscription lokal juga untuk referensi
     const plainSub = JSON.parse(JSON.stringify(subscription));
     await IdbHelper.saveSubscription(plainSub);
     console.log('Subscription disimpan ke IndexedDB.');
-    
+
     return subscription;
   } catch (err) {
     console.error('Gagal mendaftarkan subscription:', err.message);
@@ -84,6 +113,17 @@ async function unsubscribePush() {
         console.log('Subscription dibatalkan dari server API Dicoding.');
       } catch (err) {
         console.warn('Gagal membatalkan subscription dari server:', err.message);
+        // Coba fallback ke local push server
+        try {
+          await fetch(`${LOCAL_PUSH_SERVER}/unsubscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint }),
+          });
+          console.log('Subscription dibatalkan di local push server sebagai fallback.');
+        } catch (fbErr) {
+          console.warn('Fallback unsubscribe gagal:', fbErr.message);
+        }
       }
       
       // Hapus dari IndexedDB

@@ -8,6 +8,15 @@ const fs = require('fs');
 
 const app = express();
 app.use(bodyParser.json());
+// Simple CORS headers for local development so browser clients can call this server
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  // respond to preflight
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 
 // Simple JSON DB helpers (file-based)
 const dbFile = path.join(__dirname, 'db.json');

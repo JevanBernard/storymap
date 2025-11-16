@@ -47,22 +47,46 @@ registerRoute(
 );
 
 // PUSH NOTIFICATION (Sudah Benar)
+// --- Kriteria 2: PUSH NOTIFICATION ---
+
+/**
+ * PERBAIKAN: 'push' listener sekarang bisa menangani JSON atau Teks Biasa
+ */
 self.addEventListener('push', (event) => {
   console.log('Push event diterima:', event.data.text());
   
-  const data = event.data.json();
-  const notificationTitle = data.title || 'Notifikasi Baru';
-  const notificationOptions = {
-    body: data.body || 'Kamu mendapat pesan baru.',
-    icon: data.icon || 'icons/icon-192x192.png',
-    badge: 'icons/icon-192x192.png',
-    data: {
-      url: data.url || '/#/stories'
-    },
-    actions: [
-      { action: 'explore-action', title: 'Lihat Sekarang' }
-    ]
-  };
+  let data;
+  let notificationTitle;
+  let notificationOptions;
+
+  try {
+    // 1. Coba parsing sebagai JSON (untuk data dari API)
+    data = event.data.json();
+    notificationTitle = data.title || 'Notifikasi Baru';
+    notificationOptions = {
+      body: data.body || 'Kamu mendapat pesan baru.',
+      icon: data.icon || 'icons/icon-192x192.png',
+      badge: 'icons/icon-192x192.png',
+      data: {
+        url: data.url || '/#/stories' // Simpan URL untuk di-klik
+      },
+      actions: [
+        { action: 'explore-action', title: 'Lihat Sekarang' }
+      ]
+    };
+  } catch (e) {
+    // 2. Jika GAGAL, anggap sebagai Teks Biasa (untuk tes DevTools)
+    data = event.data.text();
+    notificationTitle = 'Notifikasi Tes';
+    notificationOptions = {
+      body: data, // Tampilkan teks mentah dari DevTools
+      icon: 'icons/icon-192x192.png',
+      badge: 'icons/icon-192x192.png',
+      data: {
+        url: '/#/stories' // Default URL
+      }
+    };
+  }
 
   event.waitUntil(
     self.registration.showNotification(notificationTitle, notificationOptions)

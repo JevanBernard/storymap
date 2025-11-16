@@ -1,3 +1,6 @@
+import StoryApi from '../data/story-api';
+import IdbHelper from '../data/idb-helper';
+
 const DEFAULT_VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
 // Local dev push server (fallback). Change if your local push server runs on different port.
 const LOCAL_PUSH_SERVER = 'http://localhost:4000';
@@ -13,9 +16,6 @@ function _urlB64ToUint8Array(base64String) {
   }
   return outputArray;
 }
-
-import StoryApi from '../data/story-api';
-import IdbHelper from '../data/idb-helper';
 
 // Meminta izin notifikasi ke pengguna
 async function requestNotificationPermission() {
